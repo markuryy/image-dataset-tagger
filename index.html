@@ -1,0 +1,98 @@
+<!DOCTYPE html>
+<html lang="en" class="dark">
+  <head>
+    <meta charset="UTF-8" />
+    <title>Image Dataset Tagging Application</title>
+    <!-- Include Tailwind CSS and DaisyUI -->
+    <link
+      href="https://cdn.jsdelivr.net/npm/tailwindcss@latest/dist/tailwind.min.css"
+      rel="stylesheet"
+    />
+    <link
+      href="https://cdn.jsdelivr.net/npm/daisyui@latest/dist/full.css"
+      rel="stylesheet"
+    />
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/jszip/3.6.0/jszip.min.js"></script>
+    <style>
+      /* Additional custom styles if necessary */
+      .badge-outline {
+        transition: background-color 0.3s, color 0.3s;
+      }
+      .badge-outline:hover {
+        background-color: var(--daisyui-colors-primary);
+        color: white;
+      }
+      body {
+        background-color: #1f2937; /* Dark background */
+      }
+    </style>
+  </head>
+  <body class="dark:bg-gray-800 dark:text-gray-200">
+    <div class="container mx-auto p-5" id="app-container">
+      <div class="grid grid-cols-12 gap-4">
+        <!-- Sidebar -->
+        <div
+          class="col-span-3 p-4 bg-gray-700 rounded-lg flex flex-col"
+          id="sidebar"
+          style="height: calc(100vh - 2rem)"
+        >
+          <div class="mb-4 flex-none" id="sidebar-top">
+            <button class="btn btn-primary btn-block mb-2" id="import-images">
+              Import Images
+            </button>
+            <input type="file" id="image-input" multiple hidden />
+            <button class="btn btn-secondary btn-block mb-2" id="import-tags">
+              Import Tags
+            </button>
+            <input type="file" id="tags-input" hidden />
+            <!-- Progress Bar -->
+            <progress
+              class="progress progress-primary w-full mb-4"
+              value="30"
+              max="100"
+            ></progress>
+          </div>
+          <!-- Image Previews Container with Scrollable Grid -->
+          <div class="flex-grow overflow-y-auto p-2 bg-gray-800 rounded-lg">
+            <div id="image-previews" class="grid grid-cols-2 gap-2">
+              <!-- Dynamically generated image elements will go here -->
+            </div>
+          </div>
+          <!-- Additional elements can go here, below the scrollable grid -->
+          <!-- Placeholder for additional content -->
+        </div>
+
+        <!-- Main Content -->
+        <div class="col-span-9 p-4 bg-gray-800 rounded-lg" id="main-content">
+          <div class="flex gap-4 mb-4" id="image-display-area">
+            <button class="btn btn-ghost" id="prev-image">&#8592;</button>
+            <div class="flex-grow" id="image-container">
+              <img
+                id="current-image"
+                src="placeholder.png"
+                alt="Current Image"
+                class="rounded-lg"
+              />
+            </div>
+            <button class="btn btn-ghost" id="next-image">&#8594;</button>
+          </div>
+
+          <textarea
+            class="textarea textarea-bordered w-full mb-4"
+            id="image-caption"
+            placeholder="Enter image caption here..."
+          ></textarea>
+          <div id="tag-buttons" class="flex gap-2 mb-4 flex-wrap">
+            <div class="badge badge-outline cursor-pointer hover:bg-gray-700 hover:text-white">No tags loaded</div>
+          </div>
+          <button class="btn btn-outline" id="clear-all">Delete</button>
+          <button class="btn btn-warning mb-2" id="export-data">
+            Export Data
+          </button>
+        </div>
+      </div>
+    </div>
+
+    <script src="script.js"></script>
+  </body>
+</html>
