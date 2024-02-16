@@ -193,37 +193,43 @@ document.addEventListener('DOMContentLoaded', function () {
   };
 
   imageInput.onchange = function (e) {
-    Array.from(e.target.files).forEach((file) => {
-      if (file.type.startsWith('image/')) { // Ensure it's an image file
-        const baseFilename = file.name.substring(0, file.name.lastIndexOf('.'));
-        const potentialCaptionFile = Array.from(e.target.files).find(
-          (f) => f.type === 'text/plain' && f.name.startsWith(baseFilename) // For .txt
-        );
-  
-        const newIndex = images.length + 1;
-        const renamedFile = new File(
-          [file],
-          `image_${newIndex}${file.name.substring(file.name.lastIndexOf('.'))}`
-        );
-        images.push(renamedFile);
-  
-        if (potentialCaptionFile) {
-          const reader = new FileReader();
-          reader.onload = (event) => {
-            captions[`image_${newIndex}`] = event.target.result; // Store caption
-          };
-          reader.readAsText(potentialCaptionFile);
+    const files = Array.from(e.target.files);
+    const readPromises = [];
+
+    files.forEach((file) => {
+        if (file.type.startsWith('image/')) {
+            // Process image files as before
+            const newIndex = images.length;
+            images.push(file); // Assuming you will adjust this for your renaming logic
+            addImageToSidebar(file, newIndex);
+        } else if (file.type === 'text/plain') {
+            // Read text files and store captions using Promises
+            const promise = new Promise((resolve, reject) => {
+                const reader = new FileReader();
+                reader.onload = (event) => {
+                    const baseFilename = file.name.substring(0, file.name.lastIndexOf('.'));
+                    // Find the image that matches this caption
+                    const imageIndex = images.findIndex(img => img.name.startsWith(baseFilename));
+                    if (imageIndex !== -1) {
+                        captions[`image_${imageIndex + 1}`] = event.target.result;
+                    }
+                    resolve();
+                };
+                reader.onerror = reject;
+                reader.readAsText(file);
+            });
+            readPromises.push(promise);
         }
-  
-        addImageToSidebar(renamedFile, images.length - 1);
-      }
     });
-  
-    // Only display the first image after everything is processed
-    if (images.length) {
-      displayImage(0);
-    }
-  };
+
+    Promise.all(readPromises).then(() => {
+        if (images.length) {
+            // After all captions are loaded, display the first image
+            displayImage(0);
+        }
+    });
+};
+
 
   exportDataButton.onclick = () => {
     exportData(); // Auto-save any changes before export
