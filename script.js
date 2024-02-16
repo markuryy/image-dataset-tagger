@@ -8,7 +8,7 @@ document.addEventListener('DOMContentLoaded', function () {
   const imageCaption = document.getElementById('image-caption');
   const tagButtons = document.getElementById('tag-buttons');
   const exportDataButton = document.getElementById('export-data');
-  const clearAllButton = document.getElementById('clear-all');
+  const deleteButton = document.getElementById('clear-all');
   const nextImage = document.getElementById('next-image');
   const prevImage = document.getElementById('prev-image');
 
@@ -53,7 +53,7 @@ document.addEventListener('DOMContentLoaded', function () {
     updateProgressBar(index + 1, images.length);
   }
 
-  clearAllButton.onclick = () => {
+  deleteButton.onclick = () => {
     const index = parseInt(currentImage.dataset.index || '-1');
     if (index !== -1) {
       // ... (Remove image from the sidebar) ...
@@ -173,7 +173,7 @@ document.addEventListener('DOMContentLoaded', function () {
   nextImage.onclick = () => navigateImages(1);
   prevImage.onclick = () => navigateImages(-1);
 
-  clearAllButton.onclick = () => {
+  deleteButton.onclick = () => {
     const index = parseInt(currentImage.dataset.index || '-1');
     if (index !== -1) {
       // Remove the image from the sidebar
@@ -192,6 +192,38 @@ document.addEventListener('DOMContentLoaded', function () {
     }
   };
 
+  imageInput.onchange = function (e) {
+    Array.from(e.target.files).forEach((file) => {
+      if (file.type.startsWith('image/')) { // Ensure it's an image file
+        const baseFilename = file.name.substring(0, file.name.lastIndexOf('.'));
+        const potentialCaptionFile = Array.from(e.target.files).find(
+          (f) => f.type === 'text/plain' && f.name.startsWith(baseFilename) // For .txt
+        );
+  
+        const newIndex = images.length + 1;
+        const renamedFile = new File(
+          [file],
+          `image_${newIndex}${file.name.substring(file.name.lastIndexOf('.'))}`
+        );
+        images.push(renamedFile);
+  
+        if (potentialCaptionFile) {
+          const reader = new FileReader();
+          reader.onload = (event) => {
+            captions[`image_${newIndex}`] = event.target.result; // Store caption
+          };
+          reader.readAsText(potentialCaptionFile);
+        }
+  
+        addImageToSidebar(renamedFile, images.length - 1);
+      }
+    });
+  
+    // Only display the first image after everything is processed
+    if (images.length) {
+      displayImage(0);
+    }
+  };
 
   exportDataButton.onclick = () => {
     exportData(); // Auto-save any changes before export
