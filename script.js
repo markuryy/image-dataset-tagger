@@ -51,27 +51,8 @@ document.addEventListener('DOMContentLoaded', function () {
     currentImage.dataset.index = index;
     loadCaption(index);
     updateProgressBar(index + 1, images.length);
+    currentImage.classList.add('rounded');
   }
-
-  deleteButton.onclick = () => {
-    const index = parseInt(currentImage.dataset.index || '-1');
-    if (index !== -1) {
-      // ... (Remove image from the sidebar) ...
-
-      delete images[index];
-      images = images.filter((image) => image); // Clear out undefined elements
-      delete captions[`image_${index + 1}`];
-
-      // Adjust for deletion:
-      let newIndex = Math.min(index, images.length - 1); // Account for the image being removed
-      if (newIndex === -1) {
-        resetUI();
-      } else {
-        displayImage(newIndex);
-      }
-    }
-  };
-
 
   function loadCaption(index) {
     imageCaption.value = captions[`image_${index + 1}`] || '';
@@ -173,16 +154,34 @@ document.addEventListener('DOMContentLoaded', function () {
   nextImage.onclick = () => navigateImages(1);
   prevImage.onclick = () => navigateImages(-1);
 
+  document.addEventListener('keydown', function(event) {
+    if (event.key === "ArrowRight") {
+        navigateImages(1); // Move to the next image
+    } else if (event.key === "ArrowLeft") {
+        navigateImages(-1); // Move to the previous image
+    }
+});
+
+
   deleteButton.onclick = () => {
     const index = parseInt(currentImage.dataset.index || '-1');
     if (index !== -1) {
       // Remove the image from the sidebar
       imagePreviews.querySelectorAll('img')[index].parentElement.remove();
-
+  
       delete images[index];
       images = images.filter((image) => image); // Clear out undefined elements
-      delete captions[`image_${index + 1}`];
-
+  
+      // Recalculate and assign captions to match new indices
+      const updatedCaptions = {};
+      images.forEach((_, newIndex) => {
+        const oldKey = `image_${newIndex + 2}`; // Adjust based on original index + 1 logic
+        if (captions[oldKey]) {
+          updatedCaptions[`image_${newIndex + 1}`] = captions[oldKey];
+        }
+      });
+      captions = updatedCaptions;
+  
       let newIndex = Math.min(index, images.length - 1);
       if (newIndex === -1) {
         resetUI();
